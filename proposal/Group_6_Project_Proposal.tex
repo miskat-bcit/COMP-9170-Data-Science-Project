@@ -1,0 +1,82 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\title{Fake News Detection and Media Trustworthiness: A Comparative Study of Explainable Machine Learning Models and Credibility Scoring}
+\author{\IEEEauthorblockN{Miskat Jahan and Radhika}
+\textit{COMP 9170: Data Science}\\
+\textit{School of Computing and Academic Studies}\\
+\textit{British Columbia Institute of Technology}, Burnaby, Canada\\}
+\begin{document}
+\maketitle
+
+
+
+
+\section{Introduction and Research Objectives}
+Fake news has become a serious problem as misleading information spreads rapidly through online news platforms and social media. It can influence public opinion, affect decision-making, and reduce public trust in reliable information sources. As the volume of online information continues to grow, manually checking the accuracy of every news article becomes increasingly difficult.\par
+Machine learning and Natural Language Processing (NLP) offer methods for analyzing news content and identifying patterns associated with misinformation. However, predicting whether an article is fake or real is not enough. It is also important to understand why a model makes a prediction and how reliable that prediction is. In this project, we will compare two simple models, Multinomial Naive Bayes and Logistic Regression, to classify news articles as fake or real. We will also look at the words that affect their decisions and explore an article-level credibility score. If time allows, we may also test DistilBERT.\par
+We want to answer the following research questions:\par
+\begin{enumerate}
+\item How accurately can Naive Bayes and Logistic Regression distinguish fake news from real news?
+\item Which words and linguistic features influence the models' predictions?
+\item Can calibrated model probabilities provide a useful article-level credibility indicator?
+\item How well do the models generalize across different news topics, and what biases may affect their predictions?
+\end{enumerate}
+\section{Dataset and Preliminary Analysis}
+We used the Kaggle Fake and Real News Dataset \cite{bisaillon}. It has 23,481 articles in Fake.csv and 21,417 in True.csv. Both files include a title, article text, subject, and date. We found no missing cells. There were 5,573 repeated title-and-text pairs in the fake file and 220 in the real file. After removing exact duplicates from the combined data, 39,105 articles remained.\par
+We also found a concern: the two files use different subject labels. Fake articles have labels such as News and politics, while real articles have politicsNews and worldnews. A model could learn these dataset differences instead of learning how to identify misinformation. We will therefore train with article text and check for topic, source, and duplicate-related bias.\par
+\section{Preliminary Experiment and Results}
+We have already run a first experiment in Python using scikit-learn. We labeled fake articles as 0 and real articles as 1, removed exact duplicate title-and-text pairs, and split the remaining articles into 80\% training (31,284) and 20\% testing (7,821), keeping the class proportions similar (random\_state=42). We converted the article text into TF-IDF features, removed English stop words, and limited the vocabulary to 20,000 features. TF-IDF was fitted only on the training set. We trained Multinomial Naive Bayes and Logistic Regression (max\_iter=1000).\par
+\begin{table}[t]\centering\caption{Preliminary test results}\label{tab:baseline}\footnotesize
+\begin{tabular}{lcc}\toprule
+Metric & Naive Bayes & Logistic Reg. \\
+\midrule
+Accuracy & 92.58\% & 98.54\% \\
+Precision (real) & 92.03\% & 98.16\% \\
+Recall (real) & 94.50\% & 99.17\% \\
+F1-score (real) & 93.25\% & 98.66\% \\
+\bottomrule\end{tabular}
+\end{table}
+Logistic Regression performed better in this first test. These results show that we can work with the dataset and train the models. However, they do not prove that the models can check facts in real-world news. Similar articles and source-specific writing styles may make the test easier.\par
+\section{Related Research}
+Previous studies have investigated the use of machine learning and linguistic features for fake news detection.\par
+Shu et al. \cite{shu2017} reviewed fake news detection methods and highlighted the importance of both news content and social context. Their research suggests that analyzing article text alone may not capture every aspect of misinformation.\par
+Pérez-Rosas et al. \cite{perezrosas2018} studied automatic fake news detection using linguistic features and machine learning methods. Their work provides a foundation for examining the language patterns that influence classification.\par
+Devlin et al. \cite{devlin2019} introduced BERT, a transformer-based language model that can capture contextual relationships between words. This approach provides a possible advanced comparison with traditional NLP classifiers.\par
+Our project will build on these ideas by comparing interpretable classification models, analyzing influential features, and investigating the reliability and limitations of model-based credibility estimates.\par
+\section{Proposed Methodology}
+\textbf{Phase 1: Data Preparation and Exploratory Analysis}\par
+We will use Python, pandas, and scikit-learn in Google Colab. After combining the dataset files, we will remove duplicate articles, handle missing values, and clean unnecessary text formatting. We will examine label distributions, article lengths, and topic categories through summary statistics and visualizations.\par
+\textbf{Phase 2: Feature Extraction and Model Training}\par
+We will convert news article text into numerical features using TF-IDF. We will then train two machine learning models:\par
+\begin{itemize}
+\item Multinomial Naive Bayes: A probabilistic baseline for text classification.
+\item Logistic Regression: A linear classifier that also allows us to examine the influence of individual text features.
+\end{itemize}
+We will separate training, validation, and testing data. TF-IDF fitting and model selection will use training data only, with validation data used for tuning, to reduce data leakage.\par
+\textbf{Phase 3: Model Evaluation}\par
+We will evaluate both models using accuracy, precision, recall, F1-score, and confusion matrices. We will also examine incorrect predictions to identify common classification errors.\par
+\textbf{Phase 4: Explainable NLP}\par
+We will examine influential TF-IDF features and Logistic Regression coefficients to identify words associated with fake or real predictions. We will analyze whether these features reflect meaningful linguistic patterns or dataset-specific characteristics.\par
+\textbf{Phase 5: Article-Level Credibility Scoring}\par
+We will develop an experimental credibility indicator based on each model's predicted probability that an article belongs to the real-news class.\par
+We will evaluate probability reliability using calibration curves and the Brier score, applying probability calibration when appropriate. Scores will be interpreted as model-based estimates rather than verified measures of factual accuracy.\par
+\textbf{Phase 6: Generalization and Bias Analysis}\par
+We will examine model performance across available news topics, where both classes are sufficiently represented. We will investigate potential source and topic biases, duplicate-content leakage, and whether the models rely on patterns that may not generalize to unfamiliar articles.\par
+\textbf{Optional Extension:} If time and computational resources permit, we may fine-tune DistilBERT and compare its performance with our baseline models.\par
+\section{Challenges and Expected Outcome}
+We expect to develop two functioning fake news classification models and compare their performance. We also aim to identify influential linguistic features, generate experimental article-level credibility indicators, and evaluate the reliability of model predictions.\par
+The main limitations include potential dataset bias, differences in news sources, and limited generalization to new topics or time periods. A model may identify writing patterns associated with dataset labels without verifying whether an article is factually accurate.\par
+Therefore, our credibility scores will not be used to make definitive judgments about individual journalists or news organizations. We will report uncertainty, model limitations, and the possibility of incorrect predictions.\par
+\section{Conclusion}
+This project will investigate fake news detection and media trustworthiness through traditional machine learning and explainable NLP methods. By comparing Naive Bayes and Logistic Regression, analyzing influential text features, and evaluating article-level credibility estimates, we aim to understand both the usefulness and limitations of automated fake news classification.\par
+Our focus will be on developing a practical, interpretable, and carefully evaluated approach rather than relying only on classification accuracy.\par
+
+\bibliographystyle{IEEEtran}
+\bibliography{Group_6_Project_Proposal}
+
+\end{document}
